@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -18,6 +19,7 @@ class UsuarioRegisterView(APIView):
         #VA A VALIDAR LOS DATOS CON BASE EN LAS CARACTERÍSTICAS QUE ESPECIFICAMOS
         serializer = UserCreateSerializer(data=request.data)
         if serializer.is_valid():
+            #SE VA A GUARDAR EL USUARIO CON BASE EN EL MÉTODO CREATE CREADO EN EL SERIALIZADOR
             serializer.save()
             user = CustomUser.objects.get(email=serializer.data["email"])
             token = Token.objects.create(user=user)
@@ -28,11 +30,9 @@ class UsuarioRegisterView(APIView):
 #VISTAS PARA LA LÓGICA DE LA AUTENTICACIÓN DEL USUARIO CON EL CONTROL COMPLETO DE LOS DATOS (APIView)
 class UsuarioLoginView(APIView):
     def post(self,request):
-        serializer = UserLoginSerializer(data=request.data)
-        if serializer.is_valid():
-            user = authenticate(email=serializer.data['email'], password=serializer.data['password'])
-            if not user:
-                raise serializer.ValidationError('Las credenciales no son válidas')
-            # user = serializer.validated_data["email"]
-            token,created = Token.objects.get_or_create(user=user)
-            return Response({"token":token.key})
+        user = get_object_or_404(CustomUser,email=request.data["email"])
+        if not user.check_password(request.data["password"]):
+            return Response({"error":"contrasenia invalida"},status=status.HTTP_400_BAD_REQUEST)
+        token, created = Token.objects.get_or_create(user=user)
+        serializer = UserLoginSerializer(instance=user)
+        return Response({"token":token.key,"user": serializer.data}, status=status.HTTP_200_OK)
