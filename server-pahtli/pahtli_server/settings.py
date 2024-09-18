@@ -37,8 +37,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    
+    #Librerias
     "rest_framework",
-    "testmodel.apps.TestmodelConfig"
+    "rest_framework.authtoken",
+
+    #Apps
+    "testmodel.apps.TestmodelConfig",
+    "usuario.apps.UsuarioConfig"
 ]
 
 MIDDLEWARE = [
@@ -125,6 +131,18 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+#SOLUCIÓN DE PROBLEMAS DE CORS
 CORS_ORIGIN_WITHELIST = [
     'http://localhost:9000'
 ]
+
+#MODELO QUE SE VA A UTILIZAR PARA LA AUTENTICACIÓN
+AUTH_USER_MODEL = "usuario.CustomUser"
+
+#CONFIGURACIÓN PARA LA AUTENTICACIÓN REST
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
