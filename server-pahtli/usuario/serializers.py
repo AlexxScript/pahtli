@@ -10,6 +10,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 #MÉTODO QUE SE EJECUTA DESPUES DE LLAMAR EL MÉTODO SAVE
     def create(self, validated_data):
+        #CREACIÓN O REGISTRO DEL USUARIO EN LA BASE DE DATOS
         user = CustomUser.objects.create_user(
             email=validated_data['email'],
             nombres=validated_data['nombres'],

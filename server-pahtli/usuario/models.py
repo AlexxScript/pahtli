@@ -17,6 +17,7 @@ class CustomUserManager(BaseUserManager):
             apellido_pa=apellido_pa,
             apellido_ma=apellido_ma,
             numero_celular=numero_celular,
+            #EL DOBLE ASTERISTO NOS PERMITE EXTRAER LOS DATOS QUE SE INGRESARON EN ESE CAMPO
             **extra_fields
         )
         user.set_password(password)
@@ -52,4 +53,4 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['nombres', 'apellido_pa', 'apellido_ma', 'numero_celular']
 
     def __str__(self):
-        return self.email,self.nombres
+        return self.email
