@@ -44,7 +44,8 @@ INSTALLED_APPS = [
 
     #Apps
     "testmodel.apps.TestmodelConfig",
-    "usuario.apps.UsuarioConfig"
+    "usuario.apps.UsuarioConfig",
+    "enfermedadcardio.apps.EnfermedadcardioConfig"
 ]
 
 MIDDLEWARE = [
