@@ -33,7 +33,7 @@ class PacienteView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #CREANDO LA VISTA PARA LA PREDICCION MAS NO ALMACENAMIENTO DE ENTRENAMIENTO
-class PrediccionCardioView(APIView):
+class PrediccionIndividualCardioView(APIView):
     #SE REQUIERE AUTENTICACION Y TOKEN PARA TENER ACCESO A ESTA VISTA O ENDPOINT
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -67,4 +67,46 @@ class PrediccionCardioView(APIView):
             return Response({"prediccion":prediccion[0]},status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PrediccionCSView(APIView):
+    def post(self, request):
+        csv_file = request.FILES['archivo']
+        file_data = csv_file.read().decode("utf-8")
+        lines = file_data.split("\n")
+        escalador = joblib.load("./enfermedadcardio/modeloMl/escalador.joblib")
+        predicciones = []
+        for line in lines:
+            fields = line.split(",")
+            data_dict = {}
+            data_dict['paciente'] = fields[0]
+            dolor_pec = fields[1]
+            presion_art = float(fields[2])
+            colesterol = float(fields[3])
+            azucar = float(fields[4])
+            electrocar = fields[5]
+            frecuencia_car = float(fields[6])
+            ang_ejercicio = fields[7]
+            viejo_pico_ST = float(fields[8])
+            st_slope = fields[9]
+
+            datos_paciente = [[presion_art, colesterol, azucar, electrocar, frecuencia_car, ang_ejercicio, viejo_pico_ST, st_slope]]
+            datos_paciente_escalados = escalador.transform(datos_paciente)
+            prediccion = modelo.predict(datos_paciente_escalados)
+            predicciones.append({"paciente": fields[0], "prediccion": prediccion[0]})
+
+            # fasting_bs = 0
+            # data_dict['paciente'] = fields[0]
+            # data_dict['dolor_pec'] = fields[1]
+            # data_dict['presion_art'] = fields[2]
+            # data_dict['colesterol'] = fields[3]
+            # data_dict['azucar'] = fields[4]
+            # data_dict['electrocar'] = fields[5]
+            # data_dict['frecuencia_car'] = fields[6]
+            # data_dict['ang_ejercicio'] = fields[7]
+            # data_dict['viejo_pico_ST'] = fields[8]
+            # data_dict['st_slope'] = fields[9]
+            # medico = request.data['medico']
+
+        print(csv_file)
+        return Response({"predicciones":predicciones},status=status.HTTP_200_OK)
 
