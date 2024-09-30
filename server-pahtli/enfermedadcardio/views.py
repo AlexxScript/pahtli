@@ -6,13 +6,16 @@ from rest_framework.permissions import IsAuthenticated
 
 #LIBRERIA PARA CARGAR EL MODELO Y ESCALADOR
 import joblib
+import pandas as pd
+from sklearn.metrics import f1_score,accuracy_score,precision_score,recall_score, roc_auc_score,confusion_matrix
+from sklearn.preprocessing import LabelEncoder
 
 #LLAMADA DEL MODELO PACIENTE Y ESCALADOR
 from .models import Paciente
 from .serializers import PacienteSerializer,CardioSerializer
 
 #CARGANDO EL MODELO DE ML
-modelo = joblib.load("./enfermedadcardio/modeloMl/modelo.joblib")
+modelo = joblib.load("./enfermedadcardio/modeloMl/modelo (1).joblib")
 
 #CREANDO VISTA DE PACIENTE PARA REALIZAR CONSULTAS PERSONALIZADAS (APIVIEW)
 class PacienteView(APIView):
@@ -73,40 +76,50 @@ class PrediccionCSView(APIView):
         csv_file = request.FILES['archivo']
         file_data = csv_file.read().decode("utf-8")
         lines = file_data.split("\n")
+        lines = lines[:-1]
+        lines = lines[1:]
         escalador = joblib.load("./enfermedadcardio/modeloMl/escalador.joblib")
         predicciones = []
+        rows = []
         for line in lines:
             fields = line.split(",")
-            data_dict = {}
-            data_dict['paciente'] = fields[0]
-            dolor_pec = fields[1]
-            presion_art = float(fields[2])
-            colesterol = float(fields[3])
-            azucar = float(fields[4])
-            electrocar = fields[5]
-            frecuencia_car = float(fields[6])
-            ang_ejercicio = fields[7]
-            viejo_pico_ST = float(fields[8])
-            st_slope = fields[9]
+            
+            edad = int(fields[0])
+            genero = fields[1]
+            dolor_pec = fields[2]
+            presion_art = float(fields[3])
+            colesterol = float(fields[4])
+            azucar = float(fields[5])
+            electrocar = fields[6]
+            frecuencia_car = int(fields[7])
+            ang_ejercicio = fields[8]
+            viejo_pico_ST = float(fields[9])
+            st_slope = fields[10]
+            tags = fields[11]
+            rows.append([edad, genero, dolor_pec, presion_art, colesterol, azucar, electrocar, frecuencia_car, ang_ejercicio, viejo_pico_ST, st_slope,tags])
 
-            datos_paciente = [[presion_art, colesterol, azucar, electrocar, frecuencia_car, ang_ejercicio, viejo_pico_ST, st_slope]]
-            datos_paciente_escalados = escalador.transform(datos_paciente)
-            prediccion = modelo.predict(datos_paciente_escalados)
-            predicciones.append({"paciente": fields[0], "prediccion": prediccion[0]})
+        df = pd.DataFrame(data = rows, columns = ['Age', 'Sex', 'ChestPainType', 'RestingBP', 'Cholesterol', 'FastingBS',
+       'RestingECG', 'MaxHR', 'ExerciseAngina', 'Oldpeak', 'ST_Slope',
+       'HeartDisease'])
+        # for column in df.select_dtypes(include=['object']).columns:
+        df['FastingBS'] = df['FastingBS'].astype('int64') 
+        le = LabelEncoder()
+        df['Sex'] = le.fit_transform(df['Sex'])
+        df['ChestPainType'] = le.fit_transform(df['ChestPainType'])
+        df['RestingECG'] = le.fit_transform(df['RestingECG'])
+        df['ExerciseAngina'] = le.fit_transform(df['ExerciseAngina'])
+        df['ST_Slope'] = le.fit_transform(df['ST_Slope'])
+        df['HeartDisease'] = le.fit_transform(df['HeartDisease'])
 
-            # fasting_bs = 0
-            # data_dict['paciente'] = fields[0]
-            # data_dict['dolor_pec'] = fields[1]
-            # data_dict['presion_art'] = fields[2]
-            # data_dict['colesterol'] = fields[3]
-            # data_dict['azucar'] = fields[4]
-            # data_dict['electrocar'] = fields[5]
-            # data_dict['frecuencia_car'] = fields[6]
-            # data_dict['ang_ejercicio'] = fields[7]
-            # data_dict['viejo_pico_ST'] = fields[8]
-            # data_dict['st_slope'] = fields[9]
-            # medico = request.data['medico']
-
-        print(csv_file)
+        x = df.drop('HeartDisease', axis=1)
+        y = df["HeartDisease"]
+        x = escalador.transform(x)
+        prediccion = modelo.predict(x)
+        print(df.head())
+        matriz = confusion_matrix(y,prediccion)
+        metrica = f1_score(y,prediccion)
+        print(matriz)
+        predicciones.append({"a": prediccion, "prediccion": prediccion[0],"evaluacion":metrica})
+        print(df.dtypes)
         return Response({"predicciones":predicciones},status=status.HTTP_200_OK)
 
