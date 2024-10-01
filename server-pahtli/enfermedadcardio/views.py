@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 import joblib
 import pandas as pd
 from sklearn.metrics import f1_score,accuracy_score,precision_score,recall_score, roc_auc_score,confusion_matrix
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, RobustScaler
 
 #LLAMADA DEL MODELO PACIENTE Y ESCALADOR
 from .models import Paciente
@@ -43,7 +43,7 @@ class PrediccionIndividualCardioView(APIView):
 
     def post(self, request):
         #CARAGAMOS EL ESCALADOR
-        escalador = joblib.load("./enfermedadcardio/modeloMl/escalador.joblib")
+        escalador = joblib.load("./enfermedadcardio/modeloMl/escalador_o.joblib")
         #MANDAMOS LOS DATOS AL SERIALIZADOR PARA SU VALIDACIÓN
         serializer = CardioSerializer(data=request.data)
         if serializer.is_valid():
@@ -71,19 +71,28 @@ class PrediccionIndividualCardioView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#CREANDO LA VISTA PARA LA PREDICCION A PARTIR DE CSV Y SIN ALMACENAR EN LA BD
 class PrediccionCSView(APIView):
     def post(self, request):
+        #OBTENESMOS EL ARCHIVO QUE VIENE EN EL JSON CON LA KEY archivo 
         csv_file = request.FILES['archivo']
+        #LEEMOS EL ARCHIVO QUE OBTUVIMOS DEL FORM
         file_data = csv_file.read().decode("utf-8")
+        #CADA VEZ QUE VEA UN SALTO DE LINEA CREA UN NUEVO ELEMENTO EN LA LISTA, ES DECIR LA
+        #LISTA VA A CONTENER CADA ELEMENTO DE LA FILA DEL CSV
         lines = file_data.split("\n")
+        #ELIMINA LA ULTIMA LINEA DE LA LISTA
         lines = lines[:-1]
+        #ELIMINA LA PRIMERA LINEA DE LA LISTA
         lines = lines[1:]
-        escalador = joblib.load("./enfermedadcardio/modeloMl/escalador.joblib")
+        #CARGAMOS EL ESCALADOR
+        escalador = joblib.load("./enfermedadcardio/modeloMl/escalador_o.joblib")
         predicciones = []
+        #LISTA PARA ALMACENAR CADA UNO DE LOS ELEMENTOS DE LA LISTA ANTERIOR DE TAL FORMA QUE SE SEPAREN POR LISTAS Y NO POR COMAS 
         rows = []
         for line in lines:
+            #SE TOMA EL STRING LINE Y POR CADA COMA QUE ENCUENTRE EN EL STRING SE CONVIERTE EN UN ELEMENTO DE LA LISTA QUE SE CREA
             fields = line.split(",")
-            
             edad = int(fields[0])
             genero = fields[1]
             dolor_pec = fields[2]
@@ -96,13 +105,15 @@ class PrediccionCSView(APIView):
             viejo_pico_ST = float(fields[9])
             st_slope = fields[10]
             tags = fields[11]
+            #AÑADE LA LISTA DENTRO DE LA LISTA ROWS
             rows.append([edad, genero, dolor_pec, presion_art, colesterol, azucar, electrocar, frecuencia_car, ang_ejercicio, viejo_pico_ST, st_slope,tags])
-
+        #SE CREA EL DF O TABLA 
         df = pd.DataFrame(data = rows, columns = ['Age', 'Sex', 'ChestPainType', 'RestingBP', 'Cholesterol', 'FastingBS',
        'RestingECG', 'MaxHR', 'ExerciseAngina', 'Oldpeak', 'ST_Slope',
        'HeartDisease'])
-        # for column in df.select_dtypes(include=['object']).columns:
-        df['FastingBS'] = df['FastingBS'].astype('int64') 
+        
+
+        #SE ETIQUETAN LOS VALORES CATEGÓRICOS EN VALORES ENTEROS PARA SU PROCESAMIENTO EN EL MODELO
         le = LabelEncoder()
         df['Sex'] = le.fit_transform(df['Sex'])
         df['ChestPainType'] = le.fit_transform(df['ChestPainType'])
@@ -111,15 +122,19 @@ class PrediccionCSView(APIView):
         df['ST_Slope'] = le.fit_transform(df['ST_Slope'])
         df['HeartDisease'] = le.fit_transform(df['HeartDisease'])
 
+        #SE SEPARAN LOS DATOS PREDICTORES Y LOS OBJETIVOS, EN ESTE SOLO SON NECESARIOS LOS PREDICTORES
         x = df.drop('HeartDisease', axis=1)
+        #NO ES NECESARIO Y YA QUE SON PREDICCIONES, EN ESTE MOMENTO ESTA AQUÍ POR CUESTIONES DE PRUEBAS
         y = df["HeartDisease"]
+        #SE ESCALAN LOS DATOS PREDICTORES
         x = escalador.transform(x)
+        #SE REALIZA LA PREDICCION
         prediccion = modelo.predict(x)
         print(df.head())
+        #SE MUESTRA LA MATRIZ DE CONFUSION SOLO PARA PRUEBA
         matriz = confusion_matrix(y,prediccion)
         metrica = f1_score(y,prediccion)
         print(matriz)
         predicciones.append({"a": prediccion, "prediccion": prediccion[0],"evaluacion":metrica})
-        print(df.dtypes)
         return Response({"predicciones":predicciones},status=status.HTTP_200_OK)
 
