@@ -38,4 +38,5 @@ class Cardio(models.Model):
     viejo_pico_ST = models.DecimalField(max_digits=10,decimal_places=2)
     st_slope = models.IntegerField(choices=[(2, 'ASCENDENTE'),(1, 'PLANO'),(0, 'DESCENDENTE')])
     medico = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    target = models.IntegerField(default=0)
 

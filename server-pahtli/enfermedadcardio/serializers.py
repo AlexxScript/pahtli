@@ -11,4 +11,9 @@ class CardioSerializer(serializers.Serializer):
 
     class Meta:
         model = Cardio
+        exclude = ['tag']
+
+class CardioGuardarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cardio
         fields = '__all__'
