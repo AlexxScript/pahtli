@@ -165,16 +165,12 @@ class EntrenarCardio(APIView):
         for line in lines:
             fields = line.split(",")
 
-            nombre = fields[0]
-            edad = int(fields[1])
-            genero = fields[2]
-            paciente_data = {
-                'nombre': nombre,
-                'edad': edad,
-                'genero': genero
-            }
+            if fields[3] == 'M':
+                fields[3] = 1
+            else:
+                fields[3] = 0
 
-            serializador_paciente = PacienteSerializer(data = paciente_data)
+            serializador_paciente = PacienteSerializer(data = {'nombre_paciente': fields[1],'edad': int(fields[2]),'genero': fields[3]})
             #SE TOMA EL STRING LINE Y POR CADA COMA QUE ENCUENTRE EN EL STRING SE CONVIERTE EN UN ELEMENTO DE LA LISTA QUE SE CREA
 
             if not serializador_paciente.is_valid():
@@ -182,32 +178,63 @@ class EntrenarCardio(APIView):
                 return Response(serializador_paciente.errors, status=status.HTTP_400_BAD_REQUEST)
             else:
                 paciente = serializador_paciente.save()
-                dolor_pec = fields[3]
-                presion_art = float(fields[4])
-                colesterol = float(fields[5])
-                azucar = float(fields[6])
-                electrocar = fields[7]
-                frecuencia_car = int(fields[8])
-                ang_ejercicio = fields[9]
-                viejo_pico_ST = float(fields[10])
-                st_slope = fields[11]
-                tags = fields[12]
-                cardio_data = {
-                    'paciente': paciente.id,  # Aquí asociamos el paciente creado
-                    'dolor_pec': dolor_pec,
-                    'presion_art': presion_art,
-                    'colesterol': colesterol,
-                    'azucar': azucar,
-                    'electrocar': electrocar,
-                    'frecuencia_car': frecuencia_car,
-                    'ang_ejercicio': ang_ejercicio,
-                    'viejo_pico_ST': viejo_pico_ST,
-                    'st_slope': st_slope,
-                    'tags': tags
-                }
-                serializador_cardio = CardioGuardarSerializer(data = cardio_data)
+                angina = 0
+                angina_eje = 0
+                azucar = 0
+                st = 0
+                electro = 0
+
+                if fields[4] == "ASINTOMATICO":
+                    angina = 0
+                elif fields[4] == "ANGINA ATIPICA":
+                    angina = 1
+                elif fields[4] == "SIN DOLOR ANGINAL":
+                    angina = 2
+                else:
+                    angina = 3
+
+                if float(fields[7]) > 120:
+                    azucar = 1
+                else:
+                    azucar = 0
+                
+ 
+                if fields[10].upper() == "SI":
+                    angina_eje = 1
+                else:
+                    angina_eje = 0         
+
+                if fields[12].upper() == "DESCENDENTE":
+                    st = 0
+                elif fields[12].upper() == "PLANO":
+                    st = 1      
+                else:
+                    st = 2
+                
+                if fields[8].upper() == "ANOMALIA DEL SEGMENTO ST":
+                    electro = 0
+                elif fields[8].upper() == "NORMAL":
+                    electro = 1      
+                else:
+                    electro = 2
+
+                serializador_cardio = CardioGuardarSerializer(data = {
+                    'paciente': paciente.id,
+                    'tipo_dolor_pecho': angina,  # Aquí asociamos el paciente creado
+                    'presion_arterial_reposo': fields[5],
+                    'colesterol': fields[6],
+                    'azucar_sangre_ayuno': azucar,
+                    'electrogardiograma_reposo': electro,
+                    'frecuencia_cardiaca_maxima': fields[9],
+                    'angina_por_ejercicio': angina_eje,
+                    'viejo_pico_ST': fields[11],
+                    'st_slope': st,
+                    'tags': fields[13],
+                    'medico':fields[0]
+                })
                 if serializador_cardio.is_valid():
                     serializador_cardio.save()
-                    return Response({"mensaje": "Datos guardados correctamente."}, status=status.HTTP_201_CREATED)
                 else:
                     return Response(serializador_cardio.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        return Response({"mensaje": "Datos guardados correctamente."}, status=status.HTTP_201_CREATED)
