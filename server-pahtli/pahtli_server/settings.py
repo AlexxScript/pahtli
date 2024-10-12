@@ -83,13 +83,25 @@ WSGI_APPLICATION = "pahtli_server.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#         "OPTIONS": {
+#             "timeout": 20,  # 5 seconds is the default, but we can increase it to, e.g., 20s
+#         },
+#     }
+# }
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-        "OPTIONS": {
-            "timeout": 20,  # 5 seconds is the default, but we can increase it to, e.g., 20s
-        },
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        'NAME': 'patli',
+        'USER': 'postgres',
+        'PASSWORD': 'mysecretpassword',
+        'HOST': 'localhost',
+        'PORT': '5432',
+   
     }
 }
 

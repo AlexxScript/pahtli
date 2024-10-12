@@ -183,6 +183,7 @@ class EntrenarCardio(APIView):
                 azucar = 0
                 st = 0
                 electro = 0
+                tag_int = 0
 
                 if fields[4] == "ASINTOMATICO":
                     angina = 0
@@ -217,6 +218,11 @@ class EntrenarCardio(APIView):
                     electro = 1      
                 else:
                     electro = 2
+                
+                if fields[13].upper() == 'NORMAL':
+                    tag_int = 0
+                else:
+                    tag_int = 1
 
                 serializador_cardio = CardioGuardarSerializer(data = {
                     'paciente': paciente.id,
@@ -229,7 +235,7 @@ class EntrenarCardio(APIView):
                     'angina_por_ejercicio': angina_eje,
                     'viejo_pico_ST': fields[11],
                     'st_slope': st,
-                    'tags': fields[13],
+                    'tags': tag_int,
                     'medico':fields[0]
                 })
                 if serializador_cardio.is_valid():
