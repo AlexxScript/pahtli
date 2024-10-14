@@ -6,9 +6,6 @@ from rest_framework.permissions import IsAuthenticated
 
 #LIBRERIA PARA CARGAR EL MODELO Y ESCALADOR
 import joblib
-import pandas as pd
-from sklearn.metrics import f1_score,accuracy_score,precision_score,recall_score, roc_auc_score,confusion_matrix
-from sklearn.preprocessing import LabelEncoder, RobustScaler
 
 #LLAMADA DEL MODELO PACIENTE Y ESCALADOR
 from .models import Paciente
@@ -49,24 +46,42 @@ class PrediccionIndividualCardioView(APIView):
         if serializer.is_valid():
             #EXTRAEMOS LO DATOS DE LA PETICIÓN PARA SU TRATAMIENTO 
             fasting_bs = 0
+            angina = 0
+            electro = 0
+            st = 0
             paciente = request.data['paciente']
-            dolor_pec = request.data['tipo_dolor_pecho']
-            presion_art = request.data['presion_arterial_reposo']
-            colesterol = request.data['colesterol']
-            azucar = request.data['azucar_sangre_ayuno']
-            electrocar = request.data['electrogardiograma_reposo']
-            frecuencia_car = request.data['frecuencia_cardiaca_maxima']
-            ang_ejercicio = request.data['angina_por_ejercicio']
-            viejo_pico_ST = request.data['viejo_pico_ST']
-            st_slope = request.data['st_slope']
-            medico = request.data['medico']
+            ang_ejercicio = 1 if request.data['angina_por_ejercicio'] == "SI" else 0
             patient = Paciente.objects.get(id=paciente)
 
-            if azucar > 120:
+            if request.data['azucar_sangre_ayuno'] > 120:
                 fasting_bs = 1
+
+            if request.data['tipo_dolor_pecho'] == "ASINTOMATICO":
+                angina = 0
+            elif request.data['tipo_dolor_pecho'] == "ANGINA ATIPICA":
+                angina = 1
+            elif request.data['tipo_dolor_pecho'] == "SIN DOLOR ANGINAL":
+                angina = 2
+            else:
+                angina = 3
+
+            if request.data['electrogardiograma_reposo'].upper() == "ANOMALIA DEL SEGMENTO ST":
+                electro = 0
+            elif request.data['electrogardiograma_reposo'].upper() == "NORMAL":
+                electro = 1      
+            else:
+                electro = 2
+
+            if request.data['st_slope'].upper() == "DESCENDENTE":
+                st = 0
+            elif request.data['st_slope'].upper() == "PLANO":
+                st = 1      
+            else:
+                st = 2
             #ESCALAMOS Y PREDECIMOS
-            escalador.transform([[patient.edad,patient.genero,dolor_pec,presion_art,colesterol,fasting_bs,electrocar,frecuencia_car,ang_ejercicio,viejo_pico_ST,st_slope]])
-            prediccion = modelo.predict_proba([[patient.edad,patient.genero,dolor_pec,presion_art,colesterol,fasting_bs,electrocar,frecuencia_car,ang_ejercicio,viejo_pico_ST,st_slope]])
+            x = escalador.transform([[patient.edad,patient.genero,angina, request.data['presion_arterial_reposo'],request.data['colesterol'],fasting_bs,electro,request.data['frecuencia_cardiaca_maxima'],ang_ejercicio,request.data['viejo_pico_ST'],st]])
+            # prediccion = modelo.predict([[patient.edad,patient.genero,angina,request.data['presion_arterial_reposo'],request.data['colesterol'],fasting_bs,electro,request.data['frecuencia_cardiaca_maxima'],ang_ejercicio,request.data['viejo_pico_ST'],st]])
+            prediccion = modelo.predict(x)
             return Response({"prediccion":prediccion[0]},status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -88,7 +103,7 @@ class PrediccionCSView(APIView):
         #LISTA VA A CONTENER CADA ELEMENTO DE LA FILA DEL CSV
         lines = file_data.split("\n")
         #ELIMINA LA ULTIMA LINEA DE LA LISTA
-        lines = lines[:-1]
+        # lines = lines[:-1]
         #ELIMINA LA PRIMERA LINEA DE LA LISTA
         lines = lines[1:]
         #CARGAMOS EL ESCALADOR
@@ -99,50 +114,54 @@ class PrediccionCSView(APIView):
         for line in lines:
             #SE TOMA EL STRING LINE Y POR CADA COMA QUE ENCUENTRE EN EL STRING SE CONVIERTE EN UN ELEMENTO DE LA LISTA QUE SE CREA
             fields = line.split(",")
-            edad = int(fields[0])
-            genero = fields[1]
-            dolor_pec = fields[2]
-            presion_art = float(fields[3])
-            colesterol = float(fields[4])
-            azucar = float(fields[5])
-            electrocar = fields[6]
-            frecuencia_car = int(fields[7])
-            ang_ejercicio = fields[8]
-            viejo_pico_ST = float(fields[9])
-            st_slope = fields[10]
-            tags = fields[11]
-            #AÑADE LA LISTA DENTRO DE LA LISTA ROWS
-            rows.append([edad, genero, dolor_pec, presion_art, colesterol, azucar, electrocar, frecuencia_car, ang_ejercicio, viejo_pico_ST, st_slope,tags])
-        #SE CREA EL DF O TABLA 
-        df = pd.DataFrame(data = rows, columns = ['Age', 'Sex', 'ChestPainType', 'RestingBP', 'Cholesterol', 'FastingBS',
-       'RestingECG', 'MaxHR', 'ExerciseAngina', 'Oldpeak', 'ST_Slope',
-       'HeartDisease'])
-        
+            #ELIMINA LOS ESPACIOS EN BLANCO DEL INICIO Y FINAL DEL STRING
+            fields[-1] = fields[-1].strip()
+            angina = 0
+            angina_eje = 0
+            azucar = 0
+            st = 0
+            electro = 0
 
-        #SE ETIQUETAN LOS VALORES CATEGÓRICOS EN VALORES ENTEROS PARA SU PROCESAMIENTO EN EL MODELO
-        le = LabelEncoder()
-        df['Sex'] = le.fit_transform(df['Sex'])
-        df['ChestPainType'] = le.fit_transform(df['ChestPainType'])
-        df['RestingECG'] = le.fit_transform(df['RestingECG'])
-        df['ExerciseAngina'] = le.fit_transform(df['ExerciseAngina'])
-        df['ST_Slope'] = le.fit_transform(df['ST_Slope'])
-        df['HeartDisease'] = le.fit_transform(df['HeartDisease'])
+            if fields[2] == "ASINTOMATICO":
+                angina = 0
+            elif fields[2] == "ANGINA ATIPICA":
+                angina = 1
+            elif fields[2] == "SIN DOLOR ANGINAL":
+                angina = 2
+            else:
+                angina = 3
 
-        #SE SEPARAN LOS DATOS PREDICTORES Y LOS OBJETIVOS, EN ESTE SOLO SON NECESARIOS LOS PREDICTORES
-        x = df.drop('HeartDisease', axis=1)
-        #NO ES NECESARIO Y YA QUE SON PREDICCIONES, EN ESTE MOMENTO ESTA AQUÍ POR CUESTIONES DE PRUEBAS
-        y = df["HeartDisease"]
-        #SE ESCALAN LOS DATOS PREDICTORES
-        x = escalador.transform(x)
-        #SE REALIZA LA PREDICCION
-        prediccion = modelo.predict(x)
-        probabilidades = modelo.predict_proba(x)
-        print(df.head())
-        #SE MUESTRA LA MATRIZ DE CONFUSION SOLO PARA PRUEBA
-        matriz = confusion_matrix(y,prediccion)
-        metrica = f1_score(y,prediccion)
-        print(matriz)
-        predicciones.append({"a": prediccion, "prediccion": prediccion[0],"evaluacion":metrica,"probabilidades":probabilidades})
+            if float(fields[5]) > 120:
+                azucar = 1
+            else:
+                azucar = 0
+
+            if fields[8].upper() == "SI":
+                angina_eje = 1
+            else:
+                angina_eje = 0         
+
+            if fields[10].upper() == "DESCENDENTE":
+                st = 0
+            elif fields[10].upper() == "PLANO":
+                st = 1      
+            else:
+                st = 2
+            
+            if fields[6].upper() == "ANOMALIA DEL SEGMENTO ST":
+                electro = 0
+            elif fields[6].upper() == "NORMAL":
+                electro = 1      
+            else:
+                electro = 2
+
+            if fields[1].upper() == "M":
+                genero = 1
+            else:
+                genero = 0
+            x = escalador.transform([[int(fields[0]), genero, angina, float(fields[3]), float(fields[4]), float(azucar), electro, int(fields[7]), angina_eje, float(fields[9]), st]])
+            prediccion = modelo.predict(x)
+            predicciones.append({"a": prediccion, "prediccion": prediccion[0]})
         return Response({"predicciones":predicciones},status=status.HTTP_200_OK)
  
 #CREANDO VISTA O ENDPOINT PARA ALMACENAR DATOS DE ENTRENAMIENTO (TAG O RESULTADO) EN LA BASE DE DATOS
