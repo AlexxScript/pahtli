@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 import joblib
 
 #LLAMADA DEL MODELO PACIENTE Y ESCALADOR
-from .models import Paciente
+from .models import Paciente, Cardio
 from .serializers import PacienteSerializer,CardioSerializer, CardioGuardarSerializer
 
 #CARGANDO EL MODELO DE ML
@@ -31,6 +31,35 @@ class PacienteView(APIView):
             return Response({"idPaciente":serializer.data["id"]},status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PacienteUpdateView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self,request, id_paciente):
+        paciente = Paciente.objects.get(id=id_paciente)
+        serializador = PacienteSerializer(paciente)
+        return Response({"User":serializador.data},status=status.HTTP_200_OK)
+
+    def put(self ,request , id_paciente):
+        paciente = Paciente.objects.get(id = id_paciente)
+        serializador = PacienteSerializer(paciente,data=request.data)
+        if serializador.is_valid():
+            serializador.save()
+            return Response(serializador.data,status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializador.errors,status=status.HTTP_404_NOT_FOUND)
+    
+    def delete(self, request, id_paciente):
+        # Recuperar los datos del paciente por id y alguna condición adicional, como el médico
+        try:
+            datos_paciente = Paciente.objects.get(id=id_paciente)
+        except Cardio.DoesNotExist:
+            return Response({"error": "Datos del paciente no encontrados"}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Eliminar la instancia
+        datos_paciente.delete()
+        return Response({"mensaje": "Datos eliminados correctamente"}, status=status.HTTP_204_NO_CONTENT)
 
 #CREANDO LA VISTA PARA LA PREDICCION MAS NO ALMACENAMIENTO DE ENTRENAMIENTO
 class PrediccionIndividualCardioView(APIView):
@@ -170,6 +199,12 @@ class EntrenarCardio(APIView):
     authentication_classes = [TokenAuthentication]
     #QUIENES PODRAN ACCEDER A ESTE ENDPOINT
     permission_classes = [IsAuthenticated]
+
+    def get(self,request):
+        datos = Cardio.objects.all()
+        serializador = CardioSerializer(datos)
+        return Response({"datos":serializador.data},status=status.HTTP_200_OK)
+
     def post(self, request):
         csv_file = request.FILES['archivo']
         
@@ -263,3 +298,100 @@ class EntrenarCardio(APIView):
                     return Response(serializador_cardio.errors, status=status.HTTP_400_BAD_REQUEST)
             
         return Response({"mensaje": "Datos guardados correctamente."}, status=status.HTTP_201_CREATED)
+    
+class EntrenarCardioActualizarView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self,request,id_paciente):
+        try:
+            datos_cardio = Cardio.objects.get(paciente=id_paciente, medico=request.user)
+            serializador = CardioGuardarSerializer(datos_cardio)
+            return Response({"datos":serializador.data},status=status.HTTP_200_OK)
+        except Cardio.DoesNotExist:
+            return Response({"error": "Datos de cardio no encontrados"}, status=status.HTTP_404_NOT_FOUND)
+
+    def put(self,request,id_paciente):
+        print(request.user)
+        try:
+            datos_cardio = Cardio.objects.get(paciente=id_paciente, medico=request.user)
+        except Cardio.DoesNotExist:
+            return Response({"error": "Datos de cardio no encontrados"}, status=status.HTTP_404_NOT_FOUND)
+
+        angina = 0
+        angina_eje = 0
+        azucar = 0
+        st = 0
+        electro = 0
+        tag_int = 0
+
+        if request.data['tipo_dolor_pecho'].upper() == "ASINTOMATICO":
+            angina = 0
+        elif request.data['tipo_dolor_pecho'].upper() == "ANGINA ATIPICA":
+            angina = 1
+        elif request.data['tipo_dolor_pecho'].upper() == "SIN DOLOR ANGINAL":
+            angina = 2
+        else:
+            angina = 3
+
+        if float(request.data['azucar_sangre_ayuno']) > 120:
+            azucar = 1
+        else:
+            azucar = 0
+        
+
+        if request.data['angina_por_ejercicio'].upper() == "SI":
+            angina_eje = 1
+        else:
+            angina_eje = 0         
+
+        if request.data['st_slope'].upper() == "DESCENDENTE":
+            st = 0
+        elif request.data['st_slope'].upper() == "PLANO":
+            st = 1      
+        else:
+            st = 2
+        
+        if request.data['electrogardiograma_reposo'].upper() == "ANOMALIA DEL SEGMENTO ST":
+            electro = 0
+        elif request.data['electrogardiograma_reposo'].upper() == "NORMAL":
+            electro = 1      
+        else:
+            electro = 2
+        
+        if request.data['tags'].upper() == 'NORMAL':
+            tag_int = 0
+        else:
+            tag_int = 1
+
+        serializador = CardioGuardarSerializer(datos_cardio,data = {
+            'tipo_dolor_pecho': angina,  # Aquí asociamos el paciente creado
+            'presion_arterial_reposo': request.data['presion_arterial_reposo'],
+            'colesterol': request.data['colesterol'],
+            'azucar_sangre_ayuno': azucar,
+            'electrogardiograma_reposo': electro,
+            'frecuencia_cardiaca_maxima': request.data['frecuencia_cardiaca_maxima'],
+            'angina_por_ejercicio': angina_eje,
+            'viejo_pico_ST': request.data['viejo_pico_ST'],
+            'st_slope': st,
+            'tags': tag_int,
+            "medico":request.data["medico"],
+            "paciente":request.data["paciente"],
+        })
+
+        if serializador.is_valid():
+            serializador.save()
+        else:
+            return Response(serializador.errors,status=status.HTTP_400_BAD_REQUEST)
+        return Response({"mensaje":"editado correctamente"},status=status.HTTP_201_CREATED)
+
+    def delete(self, request, id_paciente):
+        # Recuperar los datos del paciente por id y alguna condición adicional, como el médico
+        try:
+            datos_cardio = Cardio.objects.get(paciente=id_paciente, medico=request.user)
+        except Cardio.DoesNotExist:
+            return Response({"error": "Datos de Cardio no encontrados"}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Eliminar la instancia
+        datos_cardio.delete()
+        return Response({"mensaje": "Datos eliminados correctamente"}, status=status.HTTP_204_NO_CONTENT)
