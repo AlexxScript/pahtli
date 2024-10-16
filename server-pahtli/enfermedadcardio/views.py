@@ -202,7 +202,7 @@ class EntrenarCardio(APIView):
 
     def get(self,request):
         datos = Cardio.objects.all()
-        serializador = CardioSerializer(datos)
+        serializador = CardioGuardarSerializer(datos,many=True)
         return Response({"datos":serializador.data},status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -306,7 +306,9 @@ class EntrenarCardioActualizarView(APIView):
     def get(self,request,id_paciente):
         try:
             datos_cardio = Cardio.objects.get(paciente=id_paciente, medico=request.user)
+            print(datos_cardio.id)
             serializador = CardioGuardarSerializer(datos_cardio)
+            print(serializador.data)
             return Response({"datos":serializador.data},status=status.HTTP_200_OK)
         except Cardio.DoesNotExist:
             return Response({"error": "Datos de cardio no encontrados"}, status=status.HTTP_404_NOT_FOUND)

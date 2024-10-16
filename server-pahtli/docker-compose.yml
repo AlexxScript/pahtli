@@ -1,0 +1,27 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    container_name: patli2  # Este es el nombre del contenedor que mencionaste
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Esto guarda los datos de la BD en tu máquina local para persistencia
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db  # El servicio web esperará que la base de datos esté corriendo
+    environment:
+      - DEBUG=1  # Otras variables de entorno que podrías querer para tu aplicación
+
+volumes:
+  postgres_data:
