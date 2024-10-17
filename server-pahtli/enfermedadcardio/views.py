@@ -74,39 +74,30 @@ class PrediccionIndividualCardioView(APIView):
         serializer = CardioSerializer(data=request.data)
         if serializer.is_valid():
             #EXTRAEMOS LO DATOS DE LA PETICIÓN PARA SU TRATAMIENTO 
-            fasting_bs = 0
-            angina = 0
-            electro = 0
-            st = 0
             paciente = request.data['paciente']
-            ang_ejercicio = 1 if request.data['angina_por_ejercicio'] == "SI" else 0
             patient = Paciente.objects.get(id=paciente)
+            angina_map = {
+                "ASINTOMATICO": 0,
+                "ANGINA ATIPICA": 1,
+                "SIN DOLOR ANGINAL": 2,
+                "ANGINA TIPICA": 3
+            }
+            electro_map = {
+                "ANOMALIA DEL SEGMENTO ST": 0,
+                "NORMAL": 1,
+                "HIPERTROFIA VENTRICULAR IZQUIERDA": 2
+            }
+            st_map = {
+                "DESCENDENTE": 0,
+                "PLANO": 1,
+                "ASCENDENTE": 2
+            }
+            angina = angina_map.get(request.data['tipo_dolor_pecho'], 3)
+            electro = electro_map.get(request.data['electrogardiograma_reposo'].upper(), 2)
+            st = st_map.get(request.data['st_slope'].upper(), 2)
+            fasting_bs = 1 if request.data['azucar_sangre_ayuno'] > 120 else 0
+            ang_ejercicio = 1 if request.data['angina_por_ejercicio'].upper() == "SI" else 0
 
-            if request.data['azucar_sangre_ayuno'] > 120:
-                fasting_bs = 1
-
-            if request.data['tipo_dolor_pecho'] == "ASINTOMATICO":
-                angina = 0
-            elif request.data['tipo_dolor_pecho'] == "ANGINA ATIPICA":
-                angina = 1
-            elif request.data['tipo_dolor_pecho'] == "SIN DOLOR ANGINAL":
-                angina = 2
-            else:
-                angina = 3
-
-            if request.data['electrogardiograma_reposo'].upper() == "ANOMALIA DEL SEGMENTO ST":
-                electro = 0
-            elif request.data['electrogardiograma_reposo'].upper() == "NORMAL":
-                electro = 1      
-            else:
-                electro = 2
-
-            if request.data['st_slope'].upper() == "DESCENDENTE":
-                st = 0
-            elif request.data['st_slope'].upper() == "PLANO":
-                st = 1      
-            else:
-                st = 2
             #ESCALAMOS Y PREDECIMOS
             x = escalador.transform([[patient.edad,patient.genero,angina, request.data['presion_arterial_reposo'],request.data['colesterol'],fasting_bs,electro,request.data['frecuencia_cardiaca_maxima'],ang_ejercicio,request.data['viejo_pico_ST'],st]])
             # prediccion = modelo.predict([[patient.edad,patient.genero,angina,request.data['presion_arterial_reposo'],request.data['colesterol'],fasting_bs,electro,request.data['frecuencia_cardiaca_maxima'],ang_ejercicio,request.data['viejo_pico_ST'],st]])
@@ -140,54 +131,39 @@ class PrediccionCSView(APIView):
         predicciones = []
         #LISTA PARA ALMACENAR CADA UNO DE LOS ELEMENTOS DE LA LISTA ANTERIOR DE TAL FORMA QUE SE SEPAREN POR LISTAS Y NO POR COMAS 
         rows = []
+
+        angina_map = {
+            "ASINTOMATICO": 0,
+            "ANGINA ATIPICA": 1,
+            "SIN DOLOR ANGINAL": 2,
+            "ANGINA TIPICA": 3
+        }
+
+        st_map = {
+            "DESCENDENTE": 0,
+            "PLANO": 1,
+            "ASCENDENTE": 2
+        }
+
+        electro_map = {
+            "ANOMALIA DEL SEGMENTO ST": 0,
+            "NORMAL": 1,
+            "HIPERTROFIA VENTRICULAR IZQUIERDA": 2
+        }
+
         for line in lines:
             #SE TOMA EL STRING LINE Y POR CADA COMA QUE ENCUENTRE EN EL STRING SE CONVIERTE EN UN ELEMENTO DE LA LISTA QUE SE CREA
             fields = line.split(",")
             #ELIMINA LOS ESPACIOS EN BLANCO DEL INICIO Y FINAL DEL STRING
             fields[-1] = fields[-1].strip()
-            angina = 0
-            angina_eje = 0
-            azucar = 0
-            st = 0
-            electro = 0
 
-            if fields[2] == "ASINTOMATICO":
-                angina = 0
-            elif fields[2] == "ANGINA ATIPICA":
-                angina = 1
-            elif fields[2] == "SIN DOLOR ANGINAL":
-                angina = 2
-            else:
-                angina = 3
+            angina = angina_map.get(fields[2], 3)  # Default a 3 si no encuentra valor
+            st = st_map.get(fields[10].upper(), 2) # Default a 2
+            electro = electro_map.get(fields[6].upper(), 2) # Default a 2
+            angina_eje = 1 if fields[8].upper() == "SI" else 0
+            azucar = 1 if float(fields[5]) > 120 else 0
+            genero = 1 if fields[1].upper() == "M" else 0
 
-            if float(fields[5]) > 120:
-                azucar = 1
-            else:
-                azucar = 0
-
-            if fields[8].upper() == "SI":
-                angina_eje = 1
-            else:
-                angina_eje = 0         
-
-            if fields[10].upper() == "DESCENDENTE":
-                st = 0
-            elif fields[10].upper() == "PLANO":
-                st = 1      
-            else:
-                st = 2
-            
-            if fields[6].upper() == "ANOMALIA DEL SEGMENTO ST":
-                electro = 0
-            elif fields[6].upper() == "NORMAL":
-                electro = 1      
-            else:
-                electro = 2
-
-            if fields[1].upper() == "M":
-                genero = 1
-            else:
-                genero = 0
             x = escalador.transform([[int(fields[0]), genero, angina, float(fields[3]), float(fields[4]), float(azucar), electro, int(fields[7]), angina_eje, float(fields[9]), st]])
             prediccion = modelo.predict(x)
             predicciones.append({"a": prediccion, "prediccion": prediccion[0]})
@@ -201,9 +177,14 @@ class EntrenarCardio(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self,request):
-        datos = Cardio.objects.all()
-        serializador = CardioGuardarSerializer(datos,many=True)
-        return Response({"datos":serializador.data},status=status.HTTP_200_OK)
+        try:
+            datos = Cardio.objects.all()
+            datos_paciente = Paciente.objects.all()
+            serializador_paciente = PacienteSerializer(datos_paciente,many=True)
+            serializador = CardioGuardarSerializer(datos,many=True)
+            return Response({"datos":serializador.data,"paciente":serializador_paciente.data},status=status.HTTP_200_OK)
+        except Cardio.DoesNotExist:
+            return Response({"error": "Datos de cardio no encontrados"}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request):
         csv_file = request.FILES['archivo']
@@ -213,103 +194,106 @@ class EntrenarCardio(APIView):
         #LISTA VA A CONTENER CADA ELEMENTO DE LA FILA DEL CSV
         lines = file_data.split("\n")
         #ELIMINA LA ULTIMA LINEA DE LA LISTA
-        lines = lines[:-1]
+        # lines = lines[:-1]
         #ELIMINA LA PRIMERA LINEA DE LA LISTA
         lines = lines[1:]
+
+        angina_map = {
+            "ASINTOMATICO": 0,
+            "ANGINA ATIPICA": 1,
+            "SIN DOLOR ANGINAL": 2,
+            "ANGINA TIPICA": 3
+        }
+        st_map = {
+            "DESCENDENTE": 0,
+            "PLANO": 1,
+            "ASCENDENTE": 2
+        }
+        electro_map = {
+            "ANOMALIA DEL SEGMENTO ST": 0,
+            "NORMAL": 1,
+            "HIPERTROFIA VENTRICULAR IZQUIERDA": 2
+        }
+
         for line in lines:
-            fields = line.split(",")
-
-            if fields[3] == 'M':
-                fields[3] = 1
-            else:
-                fields[3] = 0
-
-            serializador_paciente = PacienteSerializer(data = {'nombre_paciente': fields[1],'edad': int(fields[2]),'genero': fields[3]})
             #SE TOMA EL STRING LINE Y POR CADA COMA QUE ENCUENTRE EN EL STRING SE CONVIERTE EN UN ELEMENTO DE LA LISTA QUE SE CREA
+            fields = line.split(",")
+            genero = 1 if fields[3].upper() == 'M' else 0
 
+            serializador_paciente = PacienteSerializer(data={
+                'nombre_paciente': fields[1],
+                'edad': int(fields[2]),
+                'genero': genero
+            })
             if not serializador_paciente.is_valid():
-            #SE GUARDA EN LA BASE DE DATOS Y SE UTILIZA EL MÉTODO CREATE DEL SERIALIZADOR Y MODELO
                 return Response(serializador_paciente.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+            paciente = serializador_paciente.save()
+
+            # Mapeo de valores categóricos
+            angina = angina_map.get(fields[4], 3)
+            azucar = 1 if float(fields[7]) > 120 else 0
+            angina_eje = 1 if fields[10].upper() == "SI" else 0
+            st = st_map.get(fields[12].upper(), 2)
+            electro = electro_map.get(fields[8].upper(), 2)
+            tag_int = 0 if fields[13].upper() == 'NORMAL' else 1
+
+            # Guardamos el paciente y seguimos con los datos de Cardio
+            serializador_cardio = CardioGuardarSerializer(data = {
+                'paciente': paciente.id,
+                'tipo_dolor_pecho': angina,  # Aquí asociamos el paciente creado
+                'presion_arterial_reposo': fields[5],
+                'colesterol': fields[6],
+                'azucar_sangre_ayuno': float(fields[7]),
+                'azucar_sangre_cat': azucar,
+                'electrogardiograma_reposo': electro,
+                'frecuencia_cardiaca_maxima': fields[9],
+                'angina_por_ejercicio': angina_eje,
+                'viejo_pico_ST': fields[11],
+                'st_slope': st,
+                'tags': tag_int,
+                'medico':fields[0]
+            })
+            if serializador_cardio.is_valid():
+                serializador_cardio.save()
             else:
-                paciente = serializador_paciente.save()
-                angina = 0
-                angina_eje = 0
-                azucar = 0
-                st = 0
-                electro = 0
-                tag_int = 0
-
-                if fields[4] == "ASINTOMATICO":
-                    angina = 0
-                elif fields[4] == "ANGINA ATIPICA":
-                    angina = 1
-                elif fields[4] == "SIN DOLOR ANGINAL":
-                    angina = 2
-                else:
-                    angina = 3
-
-                if float(fields[7]) > 120:
-                    azucar = 1
-                else:
-                    azucar = 0
-                
- 
-                if fields[10].upper() == "SI":
-                    angina_eje = 1
-                else:
-                    angina_eje = 0         
-
-                if fields[12].upper() == "DESCENDENTE":
-                    st = 0
-                elif fields[12].upper() == "PLANO":
-                    st = 1      
-                else:
-                    st = 2
-                
-                if fields[8].upper() == "ANOMALIA DEL SEGMENTO ST":
-                    electro = 0
-                elif fields[8].upper() == "NORMAL":
-                    electro = 1      
-                else:
-                    electro = 2
-                
-                if fields[13].upper() == 'NORMAL':
-                    tag_int = 0
-                else:
-                    tag_int = 1
-
-                serializador_cardio = CardioGuardarSerializer(data = {
-                    'paciente': paciente.id,
-                    'tipo_dolor_pecho': angina,  # Aquí asociamos el paciente creado
-                    'presion_arterial_reposo': fields[5],
-                    'colesterol': fields[6],
-                    'azucar_sangre_ayuno': azucar,
-                    'electrogardiograma_reposo': electro,
-                    'frecuencia_cardiaca_maxima': fields[9],
-                    'angina_por_ejercicio': angina_eje,
-                    'viejo_pico_ST': fields[11],
-                    'st_slope': st,
-                    'tags': tag_int,
-                    'medico':fields[0]
-                })
-                if serializador_cardio.is_valid():
-                    serializador_cardio.save()
-                else:
-                    return Response(serializador_cardio.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(serializador_cardio.errors, status=status.HTTP_400_BAD_REQUEST)
             
         return Response({"mensaje": "Datos guardados correctamente."}, status=status.HTTP_201_CREATED)
     
+#ELIMINACIÓN Y ACTUALIZACIÓN DE DATOS INDIVIDUALES
 class EntrenarCardioActualizarView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self,request,id_paciente):
         try:
+            datos_paciente = Paciente.objects.get(id=id_paciente)
+            serializador_paciente = PacienteSerializer(datos_paciente)
+            angina_map = {
+                0:"ASINTOMATICO",
+                1:"ANGINA ATIPICA",
+                2:"SIN DOLOR ANGINAL",
+                3:"ANGINA TIPICA"
+            }
+            st_map = {
+                0:"DESCENDENTE",
+                1:"PLANO",
+                2:"ASCENDENTE"
+            }
+            electro_map = {
+                0:"ANOMALIA DEL SEGMENTO ST",
+                1:"NORMAL",
+                2:"HIPERTROFIA VENTRICULAR IZQUIERDA"
+            }
             datos_cardio = Cardio.objects.get(paciente=id_paciente, medico=request.user)
-            print(datos_cardio.id)
+            datos_cardio.tipo_dolor_pecho = angina_map.get(datos_cardio.tipo_dolor_pecho)
+            datos_cardio.electrogardiograma_reposo = electro_map.get(datos_cardio.electrogardiograma_reposo)
+            datos_cardio.st_slope = st_map.get(datos_cardio.st_slope)
+            datos_cardio.angina_por_ejercicio = "SI" if datos_cardio.angina_por_ejercicio == 1 else "NO"
+            target = "NORMAL" if datos_cardio.target == 0 else "SI"
             serializador = CardioGuardarSerializer(datos_cardio)
-            print(serializador.data)
-            return Response({"datos":serializador.data},status=status.HTTP_200_OK)
+            return Response({"paciente":serializador_paciente.data,"datos":serializador.data,"target":target},status=status.HTTP_200_OK)
         except Cardio.DoesNotExist:
             return Response({"error": "Datos de cardio no encontrados"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -320,51 +304,37 @@ class EntrenarCardioActualizarView(APIView):
         except Cardio.DoesNotExist:
             return Response({"error": "Datos de cardio no encontrados"}, status=status.HTTP_404_NOT_FOUND)
 
-        angina = 0
-        angina_eje = 0
-        azucar = 0
-        st = 0
-        electro = 0
-        tag_int = 0
+        dolor_pecho_map = {
+            "ASINTOMATICO": 0,
+            "ANGINA ATIPICA": 1,
+            "SIN DOLOR ANGINAL": 2,
+            "DOLOR ANGINAL": 3  # ejemplo por defecto, ajusta según tus datos
+        }
 
-        if request.data['tipo_dolor_pecho'].upper() == "ASINTOMATICO":
-            angina = 0
-        elif request.data['tipo_dolor_pecho'].upper() == "ANGINA ATIPICA":
-            angina = 1
-        elif request.data['tipo_dolor_pecho'].upper() == "SIN DOLOR ANGINAL":
-            angina = 2
-        else:
-            angina = 3
+        st_slope_map = {
+            "DESCENDENTE": 0,
+            "PLANO": 1,
+            "ASCENDENTE": 2  # ejemplo por defecto
+        }
 
-        if float(request.data['azucar_sangre_ayuno']) > 120:
-            azucar = 1
-        else:
-            azucar = 0
-        
+        electro_map = {
+            "ANOMALIA DEL SEGMENTO ST": 0,
+            "NORMAL": 1,
+            "HIPERTROFIA VENTRICULAR": 2  # ejemplo por defecto
+        }
 
-        if request.data['angina_por_ejercicio'].upper() == "SI":
-            angina_eje = 1
-        else:
-            angina_eje = 0         
+        tags_map = {
+            'NORMAL': 0,
+            'SI': 1
+        }
 
-        if request.data['st_slope'].upper() == "DESCENDENTE":
-            st = 0
-        elif request.data['st_slope'].upper() == "PLANO":
-            st = 1      
-        else:
-            st = 2
-        
-        if request.data['electrogardiograma_reposo'].upper() == "ANOMALIA DEL SEGMENTO ST":
-            electro = 0
-        elif request.data['electrogardiograma_reposo'].upper() == "NORMAL":
-            electro = 1      
-        else:
-            electro = 2
-        
-        if request.data['tags'].upper() == 'NORMAL':
-            tag_int = 0
-        else:
-            tag_int = 1
+        angina = dolor_pecho_map.get(request.data['tipo_dolor_pecho'].upper(), 3)  # Valor por defecto 3 si no coincide
+        st = st_slope_map.get(request.data['st_slope'].upper(), 2)
+        electro = electro_map.get(request.data['electrogardiograma_reposo'].upper(), 2)
+        tag_int = tags_map.get(request.data['tags'].upper(), 1)
+
+        azucar = 1 if float(request.data['azucar_sangre_ayuno']) > 120 else 0
+        angina_eje = 1 if request.data['angina_por_ejercicio'].upper() == "SI" else 0
 
         serializador = CardioGuardarSerializer(datos_cardio,data = {
             'tipo_dolor_pecho': angina,  # Aquí asociamos el paciente creado

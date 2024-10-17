@@ -105,8 +105,8 @@ DATABASES = {
         'NAME': 'patli',
         'USER': 'postgres',
         'PASSWORD': 'mysecretpassword',
-        # 'HOST': 'localhost',
-        'HOST': 'db',
+        'HOST': 'localhost',
+        # 'HOST': 'db', #nombre del servicio de PostgreSQL definido en docker-compose.yml
         'PORT': '5432',
    
     }
