@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  --background: #191919;
+  --font-color: #dddddd;
+}
+
+*{
+  margin: 0;
+  padding: 0;
+  position: absolute;
+}
+
+body{
+  background: var(--background);
+  color: var(--font-color);
+}
