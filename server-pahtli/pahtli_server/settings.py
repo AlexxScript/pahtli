@@ -11,12 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-# import environ
-# import os
-
-# env = environ.Env()
-# environ.Env.read_env(os.path.join(".env", '.env'))
-
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +21,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-9u1dhdmh#j)=u$o#56ki9&zcuf#u^9$w0dja^aed&!0_a-2@j0"
+SECRET_KEY = config('SECRET_KEY') 
+# SECRET_KEY = "django-insecure-9u1dhdmh#j)=u$o#56ki9&zcuf#u^9$w0dja^aed&!0_a-2@j0"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -102,12 +98,12 @@ WSGI_APPLICATION = "pahtli_server.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        'NAME': 'patli',
-        'USER': 'postgres',
-        'PASSWORD': 'mysecretpassword',
-        'HOST': 'localhost',
+        'NAME': config('POSTGRES_NAME'),
+        'USER': config('POSTGRES_USER'),
+        'PASSWORD': config('POSTGRES_PASSWORD'),
+        'HOST': config('HOST'),
         # 'HOST': 'db', #nombre del servicio de PostgreSQL definido en docker-compose.yml
-        'PORT': '5432',
+        'PORT': config('PORT'),
    
     }
 }

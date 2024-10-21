@@ -8,6 +8,7 @@ numpy==2.1.0
 pandas==2.2.3
 psycopg2-binary==2.9.9
 python-dateutil==2.9.0.post0
+python-decouple==3.8
 pytz==2024.2
 scikit-learn==1.5.2
 scipy==1.14.1

@@ -5,6 +5,8 @@
 :root{
   --background: #191919;
   --font-color: #dddddd;
+  --title-color-g1: #7DFABB;
+  --title-color-g2: #E5AFF8;
 }
 
 *{
@@ -15,4 +17,14 @@
 body{
   background: var(--background);
   color: var(--font-color);
+}
+
+.title{
+  /* degradado https://www.baumannzone.dev/blog/bordes-con-degradado-css/ */
+  background: linear-gradient(to right, var(--title-color-g1), var(--title-color-g2));
+  background-size: cover;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  border-image: linear-gradient(to right, var(--title-color-g1), var(--title-color-g2)) 1;
 }
