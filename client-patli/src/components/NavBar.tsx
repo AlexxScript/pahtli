@@ -6,7 +6,7 @@ import icon from "/public/icon.svg"
 
 export const NavBar = () => {
     return(
-        <nav className="w-screen  bg-zinc-800 fixed top-0">
+        <nav className="w-screen fixed top-0">
             <div className="lg:max-w-5xl m-auto w-full flex flex-row items-center justify-between p-2
                 max-2xl:max-w-2xl 
             ">

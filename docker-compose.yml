@@ -4,6 +4,8 @@ services:
     image: postgres
     container_name: patli2  
     restart: always
+    env_file:
+      - ./server-pahtli/.env
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -14,9 +16,10 @@ services:
       - postgres_data:/var/lib/postgresql/data 
   web:
     build: ./server-pahtli
-    command: python manage.py runserver 0.0.0.0:8000
+    env_file:
+      - ./server-pahtli/.env
     volumes:
-      - .:/code
+      - ./server-pahtli:/code
     ports:
       - "8000:8000"
     depends_on:
