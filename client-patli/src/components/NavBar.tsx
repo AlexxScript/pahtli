@@ -5,6 +5,7 @@ import Link from "next/link";
 import icon from "/public/icon.svg"
 
 export const NavBar = () => {
+    // https://dev.to/miracool/how-to-manage-user-authentication-with-react-js-3ic5
     return(
         <nav className="w-screen fixed top-0">
             <div className="lg:max-w-5xl m-auto w-full flex flex-row items-center justify-between p-2
