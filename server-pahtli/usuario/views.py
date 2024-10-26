@@ -41,7 +41,7 @@ class UsuarioLoginView(APIView):
         #SE CREA O BUSCA EL TOKEN DEL USUARIO
         token, created = Token.objects.get_or_create(user=user)
         #CREA UN FORMATO ADECUADO PARA RETORNARLO COMO JSON
-        serializer = UserLoginSerializer(instance=user)
+        serializer = UserCreateSerializer(instance=user)
         return Response({"token":token.key,"user": serializer.data}, status=status.HTTP_200_OK)
 
 class TestView(APIView):
