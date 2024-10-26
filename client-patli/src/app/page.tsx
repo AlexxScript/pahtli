@@ -13,7 +13,6 @@ export default function Home() {
       <main className="bg-[#27272a]">
         <section className="max-w-5xl w-full mx-auto grid grid-cols-6 gap-2 max-[1024px]:max-w-3xl">
           <QueEsSection/> 
-
           <div className="">Mision</div>
           <div className="">Vision</div>
           <div className="">Valores</div>

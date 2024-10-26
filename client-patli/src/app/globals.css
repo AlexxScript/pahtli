@@ -12,6 +12,7 @@
 *{
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 body{
@@ -33,4 +34,13 @@ nav{
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   border-image: linear-gradient(to right, var(--title-color-g1), var(--title-color-g2)) 1;
+}
+
+.sectionForm{
+  border: 2px solid transparent;
+  border-image: linear-gradient(to right, var(--title-color-g1), var(--title-color-g2)) 1;
+}
+
+input{
+  outline: none;
 }

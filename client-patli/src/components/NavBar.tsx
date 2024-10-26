@@ -18,17 +18,17 @@ export const NavBar = () => {
                         className='h-14 w-auto'
                     />
                 </Link> 
-                {/* <ul className="flex flex-row justify-center items-center gap-4 max-[768px]:mx-[-100%]">
-                    <li><Link href="/">Registrar</Link></li>
-                    <li><Link href="/">Inicio de sesión</Link></li>
-                </ul> */}
-                <ul className="flex flex-row justify-center items-center gap-4 max-[768px]:mx-[-100%] max-[768px]:flex-col max-[768px]:absolute">
+                <ul className="flex flex-row justify-center items-center gap-4 max-[768px]:mx-[-100%]">
+                    <li><Link href="/registrar">Registrar</Link></li>
+                    <li><Link href="/login">Inicio de sesión</Link></li>
+                </ul>
+                {/* <ul className="flex flex-row justify-center items-center gap-4 max-[768px]:mx-[-100%] max-[768px]:flex-col max-[768px]:absolute">
                     <li><Link href="/">Inicio</Link></li>
                     <li><Link href="/">Predecir</Link></li>
                     <li><Link href="/">Estadística</Link></li>
                     <li><Link href="/">Entrenar</Link></li>
                     <li><Link href="/">Cerrar sesión</Link></li>
-                </ul>
+                </ul> */}
             </div>
         </nav>
         
