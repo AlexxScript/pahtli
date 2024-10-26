@@ -6,8 +6,8 @@ const LoginForm = () => {
     return (
         <>
             <main className="w-screen mt-[90px]">
-                <section className="sectionForm max-w-[600px] h-[75vh] w-full mx-auto flex gap-4 justify-center items-center flex-col
-                    rounded-lg bg-[#1d1d1d] border-[1px] border-[#E4B1F7] py-1
+                <section className="sectionForm max-w-[600px] w-[55%] h-[75vh] mx-auto flex gap-4 justify-center items-center flex-col
+                   p-10
                 ">
                     <div className="w-[30%]">
                         <Image
@@ -16,10 +16,10 @@ const LoginForm = () => {
                         />
                     </div>
                     <h2 className="text-[#aaa] text-xl">Inciar sesión</h2>
-                    <form className="flex flex-col gap-4" method="post">
+                    <form className="flex flex-col gap-4 w-full p-2" method="post">
                         <div className="flex flex-col">
                             <input className="rounded-md p-2 focus:border-[#7DFABB] bg-[#282A29] 
-                        border-2 border-[#666666] duration-500
+                        border-2 border-[#666666] duration-500 w-full
                         " type="email" placeholder="nombre@email.com" />
                         </div>
                         <div className="flex flex-col">

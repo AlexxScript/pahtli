@@ -6,7 +6,7 @@ const RegistrarForm = () => {
     return (
         <>
             <main className="mt-[90px]">
-                <section className="sectionForm max-w-[700px] w-[75%] mx-auto flex gap-2 justify-center items-center flex-col
+                <section className="sectionForm max-w-[600px] w-[75%] mx-auto flex gap-2 justify-center items-center flex-col
                 p-10
                 ">
                     <div className="w-[30%]">
@@ -16,7 +16,7 @@ const RegistrarForm = () => {
                         />
                     </div>
                     <h2 className="text-[#aaa] text-xl">Registrar</h2>
-                    <form className="flex flex-col gap-3 max-w-[600px]" method="post">
+                    <form className="flex flex-col gap-2 w-full" method="post">
 
                         <div className="flex flex-col">
                             <input className="rounded-md p-2 focus:border-[#7DFABB] bg-[#282A29] 
@@ -24,30 +24,30 @@ const RegistrarForm = () => {
                             " type="email" placeholder="nombre@email.com" />
                         </div>
 
-                        <div className="flex flex-row gap-2 justify-center">
+                        <div className="flex flex-row gap-2 justify-center max-[600px]:flex-col">
                             <input className="rounded-md p-2 focus:border-[#7DFABB] bg-[#282A29] 
-                            border-2 border-[#666666] duration-500 w-1/3
+                            border-2 border-[#666666] duration-500 w-1/3 max-[600px]:w-full
                             " type="text" placeholder="Nombre" />
                             <input
                                 className="rounded-md p-2 focus:border-[#7DFABB] bg-[#282A29] 
-                                border-2 border-[#666666] duration-500 w-1/3"
+                                border-2 border-[#666666] duration-500 w-1/3 max-[600px]:w-full"
                                 type="text" placeholder="Apellido paterno" />
                             <input
                                 className="rounded-md p-2 focus:border-[#7DFABB] bg-[#282A29] 
-                                border-2 border-[#666666] duration-500 w-1/3"
+                                border-2 border-[#666666] duration-500 w-1/3 max-[600px]:w-full"
                                 type="text" placeholder="Apellido materno" />
                         </div>
-                        <div className="flex flex-col">
+                        <div className="flex flex-col ">
                             <input className="rounded-md p-2 focus:border-[#7DFABB] bg-[#282A29] 
                             border-2 border-[#666666] duration-500
                             " type="text" placeholder="Número telefónico" />
                         </div>
-                        <div className="flex flex-row gap-2">
+                        <div className="flex flex-row gap-2  max-[600px]:flex-col">
                             <input className="rounded-md p-2 focus:border-[#7DFABB] bg-[#282A29] 
-                            border-2 border-[#666666] duration-500 w-1/2
+                            border-2 border-[#666666] duration-500 w-1/2 max-[600px]:w-full
                             " type="password" placeholder="password" />
                             <input className="rounded-md p-2 focus:border-[#7DFABB] bg-[#282A29] 
-                            border-2 border-[#666666] duration-500 w-1/2
+                            border-2 border-[#666666] duration-500 w-1/2 max-[600px]:w-full
                             " type="password" placeholder="Confirmar password"/>
                         </div>
                         <div className="flex justify-center items-center">
