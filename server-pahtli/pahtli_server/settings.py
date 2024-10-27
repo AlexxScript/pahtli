@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     #Librerias
     "rest_framework",
     "rest_framework.authtoken",
+    'corsheaders',
 
     #Apps
     "testmodel.apps.TestmodelConfig",
@@ -59,6 +60,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = "pahtli_server.urls"
@@ -152,7 +156,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 #SOLUCIÓN DE PROBLEMAS DE CORS
 CORS_ORIGIN_WITHELIST = [
-    'http://localhost:9000'
+    'http://localhost:3000'
+]
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000'
 ]
 
 #MODELO QUE SE VA A UTILIZAR PARA LA AUTENTICACIÓN

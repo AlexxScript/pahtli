@@ -15,7 +15,6 @@ export type LoginType = {
 } 
 
 export type AuthContextType = {
-    loginFunction: ({email, password}: LoginType) => void;
     user: UserType;
     setUser: ({id,email,nombres,apellido_pa,apellido_ma,numero_celular}:UserType) => void
     tokenUser: string | object | null;
