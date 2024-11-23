@@ -4,10 +4,11 @@ import Image from "next/image"
 import brandP from "/public/icon.svg"
 import React, { useState } from "react"
 import { RegisterType } from "@/types/types"
-import { useAuth } from "@/hooks/useAuth"
+import { useRouter } from "next/navigation"
 
 const RegistrarForm = () => {
-    const auth = useAuth();
+
+    const router = useRouter();
 
     const [values, setValues] = useState<RegisterType>({
         email:'',
@@ -28,15 +29,11 @@ const RegistrarForm = () => {
                 },
                 body:JSON.stringify(values)
             })
-            const res = await response.json() 
-            // console.log(res.token)
-            // if(res.user && res.token) {
-            // auth?.setUser(res.user)
-            // auth?.setTokenUser(res.token)
-            // localStorage.setItem("Authorization",res.token)
-            // }
+            const res = await response.json()
+            if (res.status == '201') {
+                router.push('/login')
+            }
 
-            console.log(res.user)
         } catch (error) {
             console.log(error)
         }

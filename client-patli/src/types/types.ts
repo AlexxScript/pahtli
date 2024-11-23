@@ -1,7 +1,7 @@
 import { ReactNode } from "react"
 
 export type UserType = {
-    id:number | null;
+    id:number | string | null;
     email: string | null;
     nombres: string | null;
     apellido_pa: string | null;
@@ -28,6 +28,7 @@ export type AuthContextType = {
     setUser: ({id,email,nombres,apellido_pa,apellido_ma,numero_celular}:UserType) => void
     tokenUser: string | object | null;
     setTokenUser: (tokenU: string | null) => void;
+    logOut: () => void;
 }
 
 export type PropChildrenType = {

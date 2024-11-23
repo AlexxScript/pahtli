@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import {Poppins} from 'next/font/google';
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
+import { AuthProvider } from "@/context/AuthProvider";
 
 const poppins = Poppins({ 
   weight:'400',
@@ -24,8 +25,10 @@ export default function RootLayout({
         suppressHydrationWarning={true}
         className={`${poppins.className}`}
       >
-        <NavBar/>
-        {children}
+        <AuthProvider>
+          <NavBar/>
+          {children}
+        </AuthProvider>
         <footer>
           footer
         </footer>

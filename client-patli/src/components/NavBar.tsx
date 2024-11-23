@@ -1,5 +1,4 @@
 'use client';
-
 import Image from "next/image";
 import Link from "next/link";
 import icon from "/public/icon.svg"
@@ -8,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 export const NavBar = () => {
     const auth = useAuth();
     // https://dev.to/miracool/how-to-manage-user-authentication-with-react-js-3ic5
-
+    console.log(auth?.tokenUser)
     if (!auth?.tokenUser) {
         return(
             <nav className="w-screen fixed top-0">
@@ -48,7 +47,7 @@ export const NavBar = () => {
                     <li><Link href="/">Predecir</Link></li>
                     <li><Link href="/">Estadística</Link></li>
                     <li><Link href="/">Entrenar</Link></li>
-                    <li><Link href="/">Cerrar sesión</Link></li>
+                    <li><button onClick={() => auth.logOut()}>Cerrar sesión</button></li>
                 </ul>
             </div>
         </nav>

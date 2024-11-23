@@ -3,12 +3,14 @@
 import Link from "next/link"
 import Image from "next/image"
 import brandP from "/public/icon.svg"
+import { useRouter } from "next/navigation"
 import React, { useState } from "react"
 import { LoginType } from "@/types/types"
 import { useAuth } from "@/hooks/useAuth"
 
 const LoginForm = () => {
     const auth = useAuth()
+    const router = useRouter()
     const [values, setValues] = useState<LoginType>({
         email:"",
         password:""
@@ -25,14 +27,13 @@ const LoginForm = () => {
                 body:JSON.stringify(values)
             })
             const res = await response.json() 
-            console.log(res.token)
-            // if(res.user && res.token) {
+            console.log(res.user.nombres)
             auth?.setUser(res.user)
             auth?.setTokenUser(res.token)
-            localStorage.setItem("Authorization",res.token)
-            // }
-
-            console.log(auth?.tokenUser)
+            localStorage.setItem("Authorization",res.token)   
+            localStorage.setItem("User",JSON.stringify(res.user)) //convirtiendo el objeto a string  
+            console.log(localStorage.getItem("User"))
+            router.push('dashboard/')   
         } catch (error) {
             console.log(error)
         }
