@@ -15,7 +15,6 @@ export const AuthProvider: React.FC<PropChildrenType> = ({ children}) => {
         numero_celular: null
     })
     const [tokenUser, setTokenUser] = useState<string | null>(null)
-
     return(
         <AuthContext.Provider value={{user,setUser,tokenUser,setTokenUser}} >
             {children}

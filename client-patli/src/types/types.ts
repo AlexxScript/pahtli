@@ -14,6 +14,15 @@ export type LoginType = {
     password: string;
 } 
 
+export type RegisterType = {
+    email:string;
+    nombres:string;
+    apellido_pa:string;
+    apellido_ma:string;
+    numero_celular:string;
+    password:string;
+}
+
 export type AuthContextType = {
     user: UserType;
     setUser: ({id,email,nombres,apellido_pa,apellido_ma,numero_celular}:UserType) => void

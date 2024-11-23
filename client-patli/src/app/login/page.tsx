@@ -25,12 +25,14 @@ const LoginForm = () => {
                 body:JSON.stringify(values)
             })
             const res = await response.json() 
-            console.log(res)
-            if(res.user && res.token) {
-                auth?.setUser(res.user)
-                auth?.setTokenUser(res.token)
-                localStorage.setItem("Authorization",res.token)
-            }
+            console.log(res.token)
+            // if(res.user && res.token) {
+            auth?.setUser(res.user)
+            auth?.setTokenUser(res.token)
+            localStorage.setItem("Authorization",res.token)
+            // }
+
+            console.log(auth?.tokenUser)
         } catch (error) {
             console.log(error)
         }
