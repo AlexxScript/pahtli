@@ -43,7 +43,7 @@ export const NavBar = () => {
                     />
                 </Link> 
                 <ul className="flex flex-row justify-center items-center gap-4 max-[768px]:mx-[-100%] max-[768px]:flex-col max-[768px]:absolute">
-                    <li><Link href="/">Predecir</Link></li>
+                    <li><Link href="/dashboard">Predecir</Link></li>
                     <li><Link href="/">Estadística</Link></li>
                     <li><Link href="/">Entrenar</Link></li>
                     <li><button onClick={() => auth.logOut()}>Cerrar sesión</button></li>
