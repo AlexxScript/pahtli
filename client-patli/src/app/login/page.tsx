@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import brandP from "/public/icon.svg"
 import { useRouter } from "next/navigation"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { LoginType } from "@/types/types"
 import { useAuth } from "@/hooks/useAuth"
 
@@ -15,6 +15,10 @@ const LoginForm = () => {
         email:"",
         password:""
     })
+
+    useEffect(() => {
+        if(auth?.tokenUser) router.push('/dashboard')
+    },[auth, router])
 
     const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -33,7 +37,7 @@ const LoginForm = () => {
             localStorage.setItem("Authorization",res.token)   
             localStorage.setItem("User",JSON.stringify(res.user)) //convirtiendo el objeto a string  
             console.log(localStorage.getItem("User"))
-            router.push('dashboard/')   
+            router.push('/dashboard')   
         } catch (error) {
             console.log(error)
         }

@@ -2,14 +2,14 @@
 import Link from "next/link"
 import Image from "next/image"
 import brandP from "/public/icon.svg"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { RegisterType } from "@/types/types"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/hooks/useAuth"
 
 const RegistrarForm = () => {
-
+    const auth = useAuth()
     const router = useRouter();
-
     const [values, setValues] = useState<RegisterType>({
         email:'',
         nombres:'',
@@ -18,6 +18,9 @@ const RegistrarForm = () => {
         numero_celular:'',
         password:'',
     });
+    useEffect(() => {
+        if(auth?.tokenUser) router.push('/dashboard')
+    },[auth, router])
 
     const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -30,7 +33,7 @@ const RegistrarForm = () => {
                 body:JSON.stringify(values)
             })
             const res = await response.json()
-            if (res.status == '201') {
+            if (res.token) {
                 router.push('/login')
             }
 
