@@ -26,7 +26,6 @@ export default function RootLayout({
         className={`${poppins.className}`}
       >
         <AuthProvider>
-          <NavBar/>
           {children}
         </AuthProvider>
         <footer>
