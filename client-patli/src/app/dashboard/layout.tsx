@@ -21,7 +21,7 @@ export const DashboardLayout = ({children}:PropChildrenType) => {
         const verifyAuth = async () => {
             const token = auth?.tokenUser || localStorage.getItem("Authorization");
             if (!token) {
-                router.push('login/');
+                router.push('/login');
             } else {
                 setLoading(false);
             }
