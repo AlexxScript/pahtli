@@ -7,11 +7,11 @@ class PacienteSerializer(serializers.ModelSerializer):
         fields = ['id','nombre_paciente','edad','genero']
 
 class CardioSerializer(serializers.Serializer):
-    paciente = serializers.PrimaryKeyRelatedField(queryset = Paciente.objects.all())
+    # paciente = serializers.PrimaryKeyRelatedField(queryset = Paciente.objects.all())
 
     class Meta:
         model = Cardio
-        exclude = ['tag']
+        exclude = ['tag','paciente','medico']
 
 class CardioGuardarSerializer(serializers.ModelSerializer):
     class Meta:

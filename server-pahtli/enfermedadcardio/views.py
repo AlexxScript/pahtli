@@ -74,8 +74,8 @@ class PrediccionIndividualCardioView(APIView):
         serializer = CardioSerializer(data=request.data)
         if serializer.is_valid():
             #EXTRAEMOS LO DATOS DE LA PETICIÓN PARA SU TRATAMIENTO 
-            paciente = request.data['paciente']
-            patient = Paciente.objects.get(id=paciente)
+            # paciente = request.data['paciente']
+            # patient = Paciente.objects.get(id=paciente)
             angina_map = {
                 "ASINTOMATICO": 0,
                 "ANGINA ATIPICA": 1,
@@ -92,18 +92,24 @@ class PrediccionIndividualCardioView(APIView):
                 "PLANO": 1,
                 "ASCENDENTE": 2
             }
-            angina = angina_map.get(request.data['tipo_dolor_pecho'], 3)
+            print(request.data['genero'])
+            angina = angina_map.get(request.data['tipo_dolor_pecho'])
+            print(request.data['tipo_dolor_pecho'])
             electro = electro_map.get(request.data['electrogardiograma_reposo'].upper(), 2)
             st = st_map.get(request.data['st_slope'].upper(), 2)
-            fasting_bs = 1 if request.data['azucar_sangre_ayuno'] > 120 else 0
+            fasting_bs = 1 if float(request.data['azucar_sangre_ayuno']) > 120 else 0
             ang_ejercicio = 1 if request.data['angina_por_ejercicio'].upper() == "SI" else 0
+            genero = 1 if request.data['genero'].upper() == "M" else 0
 
             #ESCALAMOS Y PREDECIMOS
-            x = escalador.transform([[patient.edad,patient.genero,angina, request.data['presion_arterial_reposo'],request.data['colesterol'],fasting_bs,electro,request.data['frecuencia_cardiaca_maxima'],ang_ejercicio,request.data['viejo_pico_ST'],st]])
+            # x = escalador.transform([[patient.edad,patient.genero,angina, request.data['presion_arterial_reposo'],request.data['colesterol'],fasting_bs,electro,request.data['frecuencia_cardiaca_maxima'],ang_ejercicio,request.data['viejo_pico_ST'],st]])
+            x = escalador.transform([[int(request.data['edad']),genero,angina, float(request.data['presion_arterial_reposo']),request.data['colesterol'],fasting_bs,electro,request.data['frecuencia_cardiaca_maxima'],ang_ejercicio,request.data['viejo_pico_ST'],st]])
             # prediccion = modelo.predict([[patient.edad,patient.genero,angina,request.data['presion_arterial_reposo'],request.data['colesterol'],fasting_bs,electro,request.data['frecuencia_cardiaca_maxima'],ang_ejercicio,request.data['viejo_pico_ST'],st]])
             prediccion = modelo.predict(x)
+            print(prediccion)
             return Response({"prediccion":prediccion[0]},status=status.HTTP_201_CREATED)
         else:
+            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #CREANDO LA VISTA PARA LA PREDICCION A PARTIR DE CSV Y SIN ALMACENAR EN LA BD
