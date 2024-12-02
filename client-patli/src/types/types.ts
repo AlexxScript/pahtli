@@ -34,3 +34,32 @@ export type AuthContextType = {
 export type PropChildrenType = {
     children: ReactNode;
 }
+
+export interface FormData {
+    edad:string;
+    genero:string;
+    tipo_dolor_pecho: string;
+    presion_arterial_reposo: string;
+    colesterol: string;
+    azucar_sangre_ayuno: string;
+    electrogardiograma_reposo: string;
+    frecuencia_cardiaca_maxima: string;
+    angina_por_ejercicio: string;
+    viejo_pico_ST: string;
+    st_slope: string;
+}
+
+export interface Prediccion {
+  edad: string;
+  genero: string;
+  angina: string;
+  presionA: string;
+  colesterol: string;
+  azucar: string;
+  electrocardio: string;
+  FrecuenciaMaxima: string;
+  anginaEjercicio: string;
+  ViejoPico: string;
+  stslope: string;
+  prediccion: string;
+}

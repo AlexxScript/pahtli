@@ -172,7 +172,7 @@ class PrediccionCSView(APIView):
 
             x = escalador.transform([[int(fields[0]), genero, angina, float(fields[3]), float(fields[4]), float(azucar), electro, int(fields[7]), angina_eje, float(fields[9]), st]])
             prediccion = modelo.predict(x)
-            predicciones.append({"a": prediccion, "prediccion": prediccion[0]})
+            predicciones.append({"edad":fields[0],"genero":fields[1],"angina":fields[2],"presionA":fields[3],"colesterol":fields[4],"azucar":fields[5],"electrocardio":fields[6].upper(),"FrecuenciaMaxima":fields[7],"anginaEjercicio":fields[8],"ViejoPico":fields[9],"stslope":fields[10],"prediccion": prediccion[0]})
         return Response({"predicciones":predicciones},status=status.HTTP_200_OK)
  
 #CREANDO VISTA O ENDPOINT PARA ALMACENAR DATOS DE ENTRENAMIENTO (TAG O RESULTADO) EN LA BASE DE DATOS
