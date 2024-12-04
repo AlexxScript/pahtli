@@ -25,9 +25,9 @@ const CholesterolByGenderChart = ({ data }: { data: Prediccion[] }) => {
         label: "Colesterol Promedio",
         data: [
           maleData.reduce((sum, item) => sum + parseInt(item.colesterol), 0) /
-            maleData.length,
+          maleData.length,
           femaleData.reduce((sum, item) => sum + parseInt(item.colesterol), 0) /
-            femaleData.length,
+          femaleData.length,
         ],
         backgroundColor: ["#4BC0C0", "#FF6384"],
       },
@@ -45,6 +45,27 @@ const CholesterolByGenderChart = ({ data }: { data: Prediccion[] }) => {
         text: "Colesterol Promedio por Género",
       },
     },
+    scales: {
+      x: {
+        ticks: {
+          color: "#999", // Color de las etiquetas en el eje X
+        },
+        grid: {
+          color: "#999", // Color de las líneas de la grilla en el eje X
+          borderColor: "#999", // Color del borde del eje X
+        },
+      },
+      y: {
+        ticks: {
+          color: "#999", // Color de las etiquetas en el eje Y
+        },
+        grid: {
+          color: "#999", // Color de las líneas de la grilla en el eje Y
+          borderColor: "#999", // Color del borde del eje Y
+        },
+      },
+    },
+
   };
 
   return <Bar data={chartData} options={options} />;

@@ -46,6 +46,27 @@ const BloodPressureChart = ({ data }: { data: Prediccion[] }) => {
         text: "Presión Arterial por Edad",
       },
     },
+    scales: {
+      x: {
+        ticks: {
+          color: "#999", // Color de las etiquetas en el eje X
+        },
+        grid: {
+          color: "#999", // Color de las líneas de la grilla en el eje X
+          borderColor: "#999", // Color del borde del eje X
+        },
+      },
+      y: {
+        ticks: {
+          color: "#999", // Color de las etiquetas en el eje Y
+        },
+        grid: {
+          color: "#999", // Color de las líneas de la grilla en el eje Y
+          borderColor: "#999", // Color del borde del eje Y
+        },
+      },
+    },
+
   };
 
   return <Line data={chartData} options={options} />;

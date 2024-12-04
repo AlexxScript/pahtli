@@ -124,17 +124,33 @@ export const FileUpload = () => {
 
 
       <div className="p-4 max-w-full overflow-x-auto mx-auto">
-        <div>
+        <div className="">
           {predicciones.length > 0 ? (
             <>
-              <CholesterolChart data={predicciones} />
-              <AnginaChart data={predicciones} />
-              <CholesterolByGenderChart data={predicciones} />
-              <BloodPressureChart data={predicciones} />
-              <CholesterolVsAgeChart data={predicciones} />
+              <div className="flex justify-center items-center gap-3 max-w-full flex-wrap">
+                <div className="w-[45%]">
+                  <CholesterolChart data={predicciones} />
+                </div>
+                <div className="w-[40%]">
+                  <AnginaChart data={predicciones} />
+                </div>
+              </div>
+
+              <div className="flex justify-center items-center gap-3 max-w-full flex-wrap my-10">
+                <div className="w-[45%]">
+                  <CholesterolByGenderChart data={predicciones} />
+                </div>
+                <div className="w-[45%]">
+                  <BloodPressureChart data={predicciones} />
+                </div>
+              </div>
+
+              <div>
+                <CholesterolVsAgeChart data={predicciones} />
+              </div>
             </>
           ) : (
-            <p>Cargando datos...</p>
+            <p>Esperando la entrada de datos...</p>
           )}
         </div>
       </div>
