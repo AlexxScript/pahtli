@@ -69,6 +69,7 @@ export const DashboardLayout = ({children}:PropChildrenType) => {
                             </button>
                         </li>
                     </ul>
+                    <h1>Versión alfa</h1>
                 </aside>
                 <section className="my-8 ml-auto mb-6 lg:w-[75%] xl:w-[80%] 2xl:w-[85%] px-6 pt-6">
                     {children}

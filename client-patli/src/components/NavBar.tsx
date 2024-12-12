@@ -20,6 +20,7 @@ export const NavBar = () => {
                             alt="Patli brand"
                             className='h-14 w-auto'
                         />
+                    Versión alfa
                     </Link> 
                     <ul className="flex flex-row justify-center items-center gap-4 max-[768px]:mx-[-100%]">
                         <li><Link href="/registrar">Registrar</Link></li>
@@ -41,6 +42,7 @@ export const NavBar = () => {
                         alt="Patli brand"
                         className='h-14 w-auto'
                     />
+                    Versión alfa
                 </Link> 
                 <ul className="flex flex-row justify-center items-center gap-4 max-[768px]:mx-[-100%] max-[768px]:flex-col max-[768px]:absolute">
                     <li><Link href="/dashboard">Predecir</Link></li>

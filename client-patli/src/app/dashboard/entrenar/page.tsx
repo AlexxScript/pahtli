@@ -50,6 +50,7 @@ export const DashboardEntrenar = () => {
   return (
     <>
       <div className="p-4 max-w-2xl overflow-x-auto mx-auto">
+        <h1 className="text-2xl text-white">Entrenar modelo para mejorar su precisión</h1>
         <form onSubmit={handleSubmit} encType="multipart/form-data">
           <label
             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
