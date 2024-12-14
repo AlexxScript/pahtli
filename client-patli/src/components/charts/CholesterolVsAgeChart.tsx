@@ -10,7 +10,6 @@ import {
   Legend,
 } from "chart.js";
 import { Prediccion } from "@/types/types";
-import { color } from "chart.js/helpers";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, Title, Tooltip, Legend);
 

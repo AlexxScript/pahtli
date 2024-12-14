@@ -1,13 +1,6 @@
 "use client"
 
-import Image from "next/image";
-import ilustration from "/public/ilustrationvector.svg"
-import useSound from "use-sound";
-
 export const Vision = () => {
-
-
-    const [playSound] = useSound("/pahtia.02501.a01.mp3")
 
     return (
         <div className="col-start-1 col-end-7 flex justify-around items-center">

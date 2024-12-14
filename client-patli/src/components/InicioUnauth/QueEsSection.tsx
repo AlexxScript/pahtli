@@ -15,7 +15,7 @@ export const QueEsSection = () => {
                 <h2 className="text-3xl">¿Qué es patli?</h2>
                 <div>
                     <p>
-                        Patli (pahtiā palabra náhuatl que significa "medicina" y se pronuncia <b className="text-[#7DFABB]"> "Pathía" </b>
+                    Patli (pahtiā palabra náhuatl que significa &quot;medicina&quot; y se pronuncia <b className="text-[#7DFABB]"> &quot;Pathía&quot; </b>
                         <button className="text-center" onClick={() => playSound()} type="button">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-volume-up" viewBox="0 0 16 16">
                                 <path d="M11.536 14.01A8.47 8.47 0 0 0 14.026 8a8.47 8.47 0 0 0-2.49-6.01l-.708.707A7.48 7.48 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303z" />

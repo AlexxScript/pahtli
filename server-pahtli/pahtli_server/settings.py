@@ -102,12 +102,11 @@ WSGI_APPLICATION = "pahtli_server.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        'NAME': config('POSTGRES_NAME'),
-        'USER': config('POSTGRES_USER'),
-        'PASSWORD': config('POSTGRES_PASSWORD'),
-        'HOST': config('HOST'),
-        # 'HOST': 'db', #nombre del servicio de PostgreSQL definido en docker-compose.yml
-        'PORT': config('PORT'),
+        'NAME': 'patli',
+        'USER': 'postgres',
+        'PASSWORD': 'password',
+        'HOST': 'db', #nombre del servicio de PostgreSQL definido en docker-compose.yml
+        'PORT': '5432',
    
     }
 }

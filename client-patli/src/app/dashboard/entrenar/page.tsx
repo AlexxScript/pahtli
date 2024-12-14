@@ -2,7 +2,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import React, { useState } from "react";
 
-export const DashboardEntrenar = () => {
+const DashboardEntrenar = () => {
   const [mensaje, setMensaje] = useState<string>();
   const auth = useAuth()
   const [file, setFile] = useState<File | null>(null);

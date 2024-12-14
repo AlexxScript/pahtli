@@ -1,14 +1,6 @@
 "use client"
 
-import Image from "next/image";
-import ilustration from "/public/ilustrationvector.svg"
-import useSound from "use-sound";
-
 export const Misio = () => {
-
-
-    const [playSound] = useSound("/pahtia.02501.a01.mp3")
-
     return (
         <div className="col-start-1 col-end-7 flex flex-row-reverse justify-around items-center">
             <div className="w-[50%] flex justify-center items-center flex-col gap-2">

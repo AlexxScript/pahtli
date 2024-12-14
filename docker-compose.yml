@@ -6,14 +6,11 @@ services:
     restart: always
     env_file:
       - ./server-pahtli/.env
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data 
+
   web:
     build: ./server-pahtli
     env_file:
@@ -26,5 +23,18 @@ services:
       - db  
     environment:
       - DEBUG=1  
+
+  frontend:
+    build: ./client-patli
+    ports:
+      - "3000:3000"
+    depends_on:
+      - web
+    env_file:
+      - ./client-patli/.env
+    volumes:
+       - ./client-patli:/app
+    command: pnpm run dev
+
 volumes:
   postgres_data:
