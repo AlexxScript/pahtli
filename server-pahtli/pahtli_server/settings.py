@@ -27,7 +27,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['5.183.9.248','http://5.183.9.248:8000/','http://5.183.9.248:3000/']
 
 
 # Application definition
@@ -155,11 +155,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 #SOLUCIÓN DE PROBLEMAS DE CORS
 CORS_ORIGIN_WITHELIST = [
-    'http://localhost:3000'
+        'http://5.5.183.9.248:3000'
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000'
+        'http://5.183.9.248:3000'
 ]
 
 #MODELO QUE SE VA A UTILIZAR PARA LA AUTENTICACIÓN
